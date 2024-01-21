@@ -2,6 +2,8 @@ import io from "socket.io-client";
 import { useRef, useEffect } from 'react'
 import { Dom, Util, Game, Render, KEY, COLORS, BACKGROUND, SPRITES } from './common.js';
 
+let localStorage = window.localStorage || {};
+
 export default function Main(props) {
   const canvasRef = useRef(null)
   let canvas = null
@@ -50,7 +52,7 @@ export default function Main(props) {
     let treeOffset     = 0;                       // 현재 나무 스크롤 오프셋
     let segments       = [];                      // 도로 세그먼트 배열
     let cars           = [];                      // 도로 상의 자동차 배열
-    let stats          = Game.stats('fps');       // mr.doobs FPS 카운터
+    // let stats          = Game.stats('fps');       // mr.doobs FPS 카운터
     // let canvas         = Dom.get('canvas');       // 우리의 캔버스...
     // let ctx            = canvas.getContext('2d'); // ...그리고 그림 컨텍스트
     let background     = null;                    // 배경 이미지 (아래에서 로드됨)
@@ -180,8 +182,8 @@ export default function Main(props) {
         if (currentLapTime && (startPosition < playerZ)) {
           lastLapTime    = currentLapTime;
           currentLapTime = 0;
-          if (lastLapTime <= Util.toFloat(Dom.storage.fast_lap_time)) {
-            Dom.storage.fast_lap_time = lastLapTime;
+          if (lastLapTime <= Util.toFloat(localStorage.fast_lap_time)) {
+            localStorage.fast_lap_time = lastLapTime;
             updateHud('fast_lap_time', formatTime(lastLapTime));
             Dom.addClassName('fast_lap_time', 'fastest');
             Dom.addClassName('last_lap_time', 'fastest');
@@ -190,7 +192,7 @@ export default function Main(props) {
             Dom.removeClassName('fast_lap_time', 'fastest');
             Dom.removeClassName('last_lap_time', 'fastest');
           }
-          updateHud('last_lap_time', formatTime(lastLapTime));
+          // updateHud('last_lap_time', formatTime(lastLapTime));
           Dom.show('last_lap_time');
         }
         else {
@@ -199,8 +201,8 @@ export default function Main(props) {
       }
     
       // HUD 업데이트
-      updateHud('speed',            5 * Math.round(speed/500));
-      updateHud('current_lap_time', formatTime(currentLapTime));
+      // updateHud('speed',            5 * Math.round(speed/500));
+      // updateHud('current_lap_time', formatTime(currentLapTime));
     }
     
     //-------------------------------------------------------------------------
@@ -562,15 +564,19 @@ export default function Main(props) {
       resetSprites();
       resetCars();
     
+      // 플레이어 현재 위치 다음 2개 세그먼트의 색을 START 색으로 설정
       segments[findSegment(playerZ).index + 2].color = COLORS.START;
+      // 플레이어 현재 위치 다음 3개 세그먼트의 색을 START 색으로 설정
       segments[findSegment(playerZ).index + 3].color = COLORS.START;
+      // 룸블 길이만큼의 마지막 세그먼트부터 거꾸로 루프하며 색을 FINISH 색으로 설정
       for(let n = 0 ; n < rumbleLength ; n++)
         segments[segments.length-1-n].color = COLORS.FINISH;
-    
+      // 각 세그먼트의 길이를 곱하여 전체 트랙 길이 계산
       trackLength = segments.length * segmentLength;
     }
     
     function resetSprites() {
+      // 고정된 위치에 각종 스프라이트 추가
       addSprite(20,  SPRITES.BILLBOARD07, -1);
       addSprite(40,  SPRITES.BILLBOARD06, -1);
       addSprite(60,  SPRITES.BILLBOARD08, -1);
@@ -586,6 +592,7 @@ export default function Main(props) {
       addSprite(segments.length - 25, SPRITES.BILLBOARD07, -1.2);
       addSprite(segments.length - 25, SPRITES.BILLBOARD06,  1.2);
     
+      // 팜 트리 및 기둥, 나무 등 다양한 스프라이트를 추가
       for(let n = 10 ; n < 200 ; n += 4 + Math.floor(n/100)) {
         addSprite(n, SPRITES.PALM_TREE, 0.5 + Math.random()*0.5);
         addSprite(n, SPRITES.PALM_TREE,   1 + Math.random()*2);
@@ -597,10 +604,12 @@ export default function Main(props) {
         addSprite(n + Util.randomInt(0,5), SPRITES.TREE2, -1 - (Math.random() * 2));
       }
     
+      // 다양한 위치에 랜덤하게 식물 스프라이트 추가
       for(let n = 200 ; n < segments.length ; n += 3) {
         addSprite(n, Util.randomChoice(SPRITES.PLANTS), Util.randomChoice([1,-1]) * (2 + Math.random() * 5));
       }
     
+      // 일정한 간격으로 랜덤한 방향으로 빌보드 및 식물 스프라이트 추가
       let side, sprite, offset;
       for(let n = 1000 ; n < (segments.length-50) ; n += 100) {
         side      = Util.randomChoice([1, -1]);
@@ -638,7 +647,8 @@ export default function Main(props) {
     
     // 게임 실행 및 초기화
     Game.run({
-      canvas: canvas, render: render, update: update, stats: stats, step: step,
+      // canvas: canvas, render: render, update: update, stats: stats, step: step,
+      canvas: canvas, render: render, update: update, step: step,
       images: ["background", "sprites"],
       keys: [
         { keys: [KEY.LEFT,  KEY.A], mode: 'down', action: function() { keyLeft   = true;  } },
@@ -654,8 +664,8 @@ export default function Main(props) {
         background = images[0];
         sprites    = images[1];
         reset();
-        Dom.storage.fast_lap_time = Dom.storage.fast_lap_time || 180;
-        updateHud('fast_lap_time', formatTime(Util.toFloat(Dom.storage.fast_lap_time)));
+        localStorage.fast_lap_time = localStorage.fast_lap_time || 180;
+        updateHud('fast_lap_time', formatTime(Util.toFloat(localStorage.fast_lap_time)));
       }
     });
     
@@ -734,14 +744,6 @@ export default function Main(props) {
     <div>
       <table id="controls">
         <tbody>
-          <tr>
-            <td colSpan="2">
-              <a href='v1.straight.html'>straight</a> |
-              <a href='v2.curves.html'>curves</a>     |
-              <a href='v3.hills.html'>hills</a>       |
-              <a href='v4.final.html'>final</a>
-            </td>
-          </tr>
           <tr><td id="fps" colSpan="2" align="right"></td></tr>
           <tr>
             <th><label htmlFor="resolution">Resolution :</label></th>
@@ -805,7 +807,7 @@ export default function Main(props) {
           <span id="speed"            className="hud"><span id="speed_value" className="value">0</span> mph</span>
           <span id="current_lap_time" className="hud">Time: <span id="current_lap_time_value" className="value">0.0</span></span> 
           <span id="last_lap_time"    className="hud">Last Lap: <span id="last_lap_time_value" className="value">0.0</span></span>
-          <span id="fast_lap_time"    className="hud">Fastest Lap: <span id="fast_lap_time_value" className="value">0.0</span></span>
+          <span id="fast_lap_time"    className="hud">Fastest Lap: <span id="fast_lap_time_value" className="value"></span></span>
         </div>
         {/* <canvas id="canvas">
           Sorry, this example cannot be run because your browser does not support the &lt;canvas&gt; element
