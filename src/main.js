@@ -4,20 +4,16 @@ import { Dom, Util, Game, Render, KEY, COLORS, BACKGROUND, SPRITES } from './com
 
 let localStorage = window.localStorage || {};
 
-export default function Main(props) {
+const Main = (props) => {
   const canvasRef = useRef(null)
-  let canvas = null
-  let ctx = null
   useEffect(() => {
-    canvas = canvasRef.current
-    ctx = canvas.getContext('2d')
-  }, [])
-  window.onload = () => {
-
-    const socketClient = io("http://192.168.30.204:3000");
-    socketClient.on("connect", () => {
-      console.log(`connection server`);
-    });
+    const canvas = canvasRef.current
+    const ctx = canvas.getContext('2d')
+  
+    // const socketClient = io("http://192.168.30.204:3000");
+    // socketClient.on("connect", () => {
+    //   console.log(`connection server`);
+    // });
     
     const playerNumber = 0; // 0 ~ 3
     const playerData = [
@@ -87,28 +83,29 @@ export default function Main(props) {
     let keyFaster      = false;
     let keySlower      = false;
     
-    let hud = {
-      speed:            { value: null, dom: Dom.get('speed_value')            },
-      current_lap_time: { value: null, dom: Dom.get('current_lap_time_value') },
-      last_lap_time:    { value: null, dom: Dom.get('last_lap_time_value')    },
-      fast_lap_time:    { value: null, dom: Dom.get('fast_lap_time_value')    }
-    }
+    // let hud = {
+    //   speed:            { value: null, dom: Dom.get('speed_value')            },
+    //   current_lap_time: { value: null, dom: Dom.get('current_lap_time_value') },
+    //   last_lap_time:    { value: null, dom: Dom.get('last_lap_time_value')    },
+    //   fast_lap_time:    { value: null, dom: Dom.get('fast_lap_time_value')    }
+    // }
     
     //=========================================================================
     // UPDATE THE GAME WORLD
     //=========================================================================
     
     function update(dt) {
+      
       // 데이터 보내기
       // console.log("데이터 보냄!!")
       playerData[playerNumber].userX = playerX;
       playerData[playerNumber].userZ = position + playerZ;
-      socketClient.emit("playerData", playerData);
+      // socketClient.emit("playerData", playerData);
       // 데이터 받기
-      socketClient.on("playerData", (data) => {
-      // console.log("데이터 받음!!")
-        playerData = data;
-      })
+      // socketClient.on("playerData", (data) => {
+      // // console.log("데이터 받음!!")
+      //   playerData = data;
+      // })
     
       let car, carW, sprite, spriteW;
       let playerSegment = findSegment(position+playerZ);
@@ -178,27 +175,27 @@ export default function Main(props) {
       treeOffset = Util.increase(treeOffset, treeSpeed * playerSegment.curve * (position-startPosition)/segmentLength, 1);
     
       // 현재 랩 타임 업데이트 및 최고 랩 타임 확인
-      if (position > playerZ) {
-        if (currentLapTime && (startPosition < playerZ)) {
-          lastLapTime    = currentLapTime;
-          currentLapTime = 0;
-          if (lastLapTime <= Util.toFloat(localStorage.fast_lap_time)) {
-            localStorage.fast_lap_time = lastLapTime;
-            updateHud('fast_lap_time', formatTime(lastLapTime));
-            Dom.addClassName('fast_lap_time', 'fastest');
-            Dom.addClassName('last_lap_time', 'fastest');
-          }
-          else {
-            Dom.removeClassName('fast_lap_time', 'fastest');
-            Dom.removeClassName('last_lap_time', 'fastest');
-          }
-          // updateHud('last_lap_time', formatTime(lastLapTime));
-          Dom.show('last_lap_time');
-        }
-        else {
-          currentLapTime += dt;
-        }
-      }
+      // if (position > playerZ) {
+      //   if (currentLapTime && (startPosition < playerZ)) {
+      //     lastLapTime    = currentLapTime;
+      //     currentLapTime = 0;
+      //     if (lastLapTime <= Util.toFloat(localStorage.fast_lap_time)) {
+      //       localStorage.fast_lap_time = lastLapTime;
+      //       updateHud('fast_lap_time', formatTime(lastLapTime));
+      //       Dom.addClassName('fast_lap_time', 'fastest');
+      //       Dom.addClassName('last_lap_time', 'fastest');
+      //     }
+      //     else {
+      //       Dom.removeClassName('fast_lap_time', 'fastest');
+      //       Dom.removeClassName('last_lap_time', 'fastest');
+      //     }
+      //     // updateHud('last_lap_time', formatTime(lastLapTime));
+      //     Dom.show('last_lap_time');
+      //   }
+      //   else {
+      //     currentLapTime += dt;
+      //   }
+      // }
     
       // HUD 업데이트
       // updateHud('speed',            5 * Math.round(speed/500));
@@ -291,13 +288,13 @@ export default function Main(props) {
     
     //-------------------------------------------------------------------------
     
-    function updateHud(key, value) {
-      // DOM 접근은 느릴 수 있으므로 값이 변경되었을 때만 수행합니다.
-      if (hud[key].value !== value) {
-        hud[key].value = value;
-        Dom.set(hud[key].dom, value);
-      }
-    }
+    // function updateHud(key, value) {
+    //   // DOM 접근은 느릴 수 있으므로 값이 변경되었을 때만 수행합니다.
+    //   if (hud[key].value !== value) {
+    //     hud[key].value = value;
+    //     Dom.set(hud[key].dom, value);
+    //   }
+    // }
     
     function formatTime(dt) {
       let minutes = Math.floor(dt/60);
@@ -647,6 +644,7 @@ export default function Main(props) {
     
     // 게임 실행 및 초기화
     Game.run({
+      
       // canvas: canvas, render: render, update: update, stats: stats, step: step,
       canvas: canvas, render: render, update: update, step: step,
       images: ["background", "sprites"],
@@ -661,11 +659,12 @@ export default function Main(props) {
         { keys: [KEY.DOWN,  KEY.S], mode: 'up',   action: function() { keySlower = false; } }
       ],
       ready: function(images) {
+        
         background = images[0];
         sprites    = images[1];
         reset();
         localStorage.fast_lap_time = localStorage.fast_lap_time || 180;
-        updateHud('fast_lap_time', formatTime(Util.toFloat(localStorage.fast_lap_time)));
+        // updateHud('fast_lap_time', formatTime(Util.toFloat(localStorage.fast_lap_time)));
       }
     });
     
@@ -688,7 +687,7 @@ export default function Main(props) {
       cameraDepth            = 1 / Math.tan((fieldOfView/2) * Math.PI/180);
       playerZ                = (cameraHeight * cameraDepth);
       resolution             = height/480;
-      refreshTweakUI();
+      // refreshTweakUI();
     
       if ((segments.length==0) || (options.segmentLength) || (options.rumbleLength))
         resetRoad(); // 필요할 때만 도로를 다시 만듭니다.
@@ -699,46 +698,45 @@ export default function Main(props) {
     //=========================================================================
     
     // 해상도 설정 변경 시 이벤트 핸들러
-    Dom.on('resolution', 'change', function(ev) {
-      let w, h, ratio;
-      switch(ev.target.options[ev.target.selectedIndex].value) {
-        case 'fine':   w = 1280; h = 960;  ratio=w/width; break;
-        case 'high':   w = 1024; h = 768;  ratio=w/width; break;
-        case 'medium': w = 640;  h = 480;  ratio=w/width; break;
-        case 'low':    w = 480;  h = 360;  ratio=w/width; break;
-      }
-      reset({ width: w, height: h })
-      Dom.blur(ev);
-    });
+    // Dom.on('resolution', 'change', function(ev) {
+    //   let w, h, ratio;
+    //   switch(ev.target.options[ev.target.selectedIndex].value) {
+    //     case 'fine':   w = 1280; h = 960;  ratio=w/width; break;
+    //     case 'high':   w = 1024; h = 768;  ratio=w/width; break;
+    //     case 'medium': w = 640;  h = 480;  ratio=w/width; break;
+    //     case 'low':    w = 480;  h = 360;  ratio=w/width; break;
+    //   }
+    //   reset({ width: w, height: h })
+    //   Dom.blur(ev);
+    // });
     
     // 차선 수 변경 시 이벤트 핸들러
-    Dom.on('lanes',          'change', function(ev) { Dom.blur(ev); reset({ lanes:         ev.target.options[ev.target.selectedIndex].value }); });
-    // 도로 폭 변경 시 이벤트 핸들러
-    Dom.on('roadWidth',      'change', function(ev) { Dom.blur(ev); reset({ roadWidth:     Util.limit(Util.toInt(ev.target.value), Util.toInt(ev.target.getAttribute('min')), Util.toInt(ev.target.getAttribute('max'))) }); });
-    // 카메라 높이 변경 시 이벤트 핸들러
-    Dom.on('cameraHeight',   'change', function(ev) { Dom.blur(ev); reset({ cameraHeight:  Util.limit(Util.toInt(ev.target.value), Util.toInt(ev.target.getAttribute('min')), Util.toInt(ev.target.getAttribute('max'))) }); });
-    // 랜더링 거리 변경 시 이벤트 핸들러
-    Dom.on('drawDistance',   'change', function(ev) { Dom.blur(ev); reset({ drawDistance:  Util.limit(Util.toInt(ev.target.value), Util.toInt(ev.target.getAttribute('min')), Util.toInt(ev.target.getAttribute('max'))) }); });
-    // 시야각 변경 시 이벤트 핸들러
-    Dom.on('fieldOfView',    'change', function(ev) { Dom.blur(ev); reset({ fieldOfView:   Util.limit(Util.toInt(ev.target.value), Util.toInt(ev.target.getAttribute('min')), Util.toInt(ev.target.getAttribute('max'))) }); });
-    // 안개 밀도 변경 시 이벤트 핸들러
-    Dom.on('fogDensity',     'change', function(ev) { Dom.blur(ev); reset({ fogDensity:    Util.limit(Util.toInt(ev.target.value), Util.toInt(ev.target.getAttribute('min')), Util.toInt(ev.target.getAttribute('max'))) }); });
+    // Dom.on('lanes',          'change', function(ev) { Dom.blur(ev); reset({ lanes:         ev.target.options[ev.target.selectedIndex].value }); });
+    // // 도로 폭 변경 시 이벤트 핸들러
+    // Dom.on('roadWidth',      'change', function(ev) { Dom.blur(ev); reset({ roadWidth:     Util.limit(Util.toInt(ev.target.value), Util.toInt(ev.target.getAttribute('min')), Util.toInt(ev.target.getAttribute('max'))) }); });
+    // // 카메라 높이 변경 시 이벤트 핸들러
+    // Dom.on('cameraHeight',   'change', function(ev) { Dom.blur(ev); reset({ cameraHeight:  Util.limit(Util.toInt(ev.target.value), Util.toInt(ev.target.getAttribute('min')), Util.toInt(ev.target.getAttribute('max'))) }); });
+    // // 랜더링 거리 변경 시 이벤트 핸들러
+    // Dom.on('drawDistance',   'change', function(ev) { Dom.blur(ev); reset({ drawDistance:  Util.limit(Util.toInt(ev.target.value), Util.toInt(ev.target.getAttribute('min')), Util.toInt(ev.target.getAttribute('max'))) }); });
+    // // 시야각 변경 시 이벤트 핸들러
+    // Dom.on('fieldOfView',    'change', function(ev) { Dom.blur(ev); reset({ fieldOfView:   Util.limit(Util.toInt(ev.target.value), Util.toInt(ev.target.getAttribute('min')), Util.toInt(ev.target.getAttribute('max'))) }); });
+    // // 안개 밀도 변경 시 이벤트 핸들러
+    // Dom.on('fogDensity',     'change', function(ev) { Dom.blur(ev); reset({ fogDensity:    Util.limit(Util.toInt(ev.target.value), Util.toInt(ev.target.getAttribute('min')), Util.toInt(ev.target.getAttribute('max'))) }); });
     
-    // UI 업데이트 함수
-    function refreshTweakUI() {
-      Dom.get('lanes').selectedIndex = lanes-1;
-      Dom.get('currentRoadWidth').innerHTML      = Dom.get('roadWidth').value      = roadWidth;
-      Dom.get('currentCameraHeight').innerHTML   = Dom.get('cameraHeight').value   = cameraHeight;
-      Dom.get('currentDrawDistance').innerHTML   = Dom.get('drawDistance').value   = drawDistance;
-      Dom.get('currentFieldOfView').innerHTML    = Dom.get('fieldOfView').value    = fieldOfView;
-      Dom.get('currentFogDensity').innerHTML     = Dom.get('fogDensity').value     = fogDensity;
-    }
-    
-    //=========================================================================
+    // // UI 업데이트 함수
+    // function refreshTweakUI() {
+    //   Dom.get('lanes').selectedIndex = lanes-1;
+    //   Dom.get('currentRoadWidth').innerHTML      = Dom.get('roadWidth').value      = roadWidth;
+    //   Dom.get('currentCameraHeight').innerHTML   = Dom.get('cameraHeight').value   = cameraHeight;
+    //   Dom.get('currentDrawDistance').innerHTML   = Dom.get('drawDistance').value   = drawDistance;
+    //   Dom.get('currentFieldOfView').innerHTML    = Dom.get('fieldOfView').value    = fieldOfView;
+    //   Dom.get('currentFogDensity').innerHTML     = Dom.get('fogDensity').value     = fogDensity;
+    // }
     
     //=========================================================================
-  
-  }
+    
+    //=========================================================================
+  }, [])
   
   return (
     <div>
@@ -821,3 +819,5 @@ export default function Main(props) {
     </div>
   )
 }
+
+export default Main;

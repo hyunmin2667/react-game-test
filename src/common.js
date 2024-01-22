@@ -1,5 +1,14 @@
 import Stats from './stats.js';
 import { KEY, COLORS, BACKGROUND, SPRITES } from './gameConstants.js';
+import background from './images/background.png';
+import mute from './images/mute.png';
+import sprites from './images/sprites.png';
+
+const images = {
+  background: background, 
+  mute: mute, 
+  sprites: sprites
+};
 
 //=========================================================================
 // 미니멀리스트 DOM 도우미
@@ -10,7 +19,7 @@ const Dom = {
   // 내용 설정
   set:  function(id, html)               { Dom.get(id).innerHTML = html;                        },
   // 이벤트 등록
-  on:   function(ele, type, fn, capture) { Dom.get(ele).addEventListener(type, fn, capture);    },
+  on:   function(ele, type, fn, capture) { Dom.get(ele).addEventListener(type, fn, capture);console.log(`Dom.on`)    },
   // 이벤트 해제
   un:   function(ele, type, fn, capture) { Dom.get(ele).removeEventListener(type, fn, capture); },
   // 요소 표시
@@ -106,7 +115,7 @@ const Util = {
 //=========================================================================
 // 애니메이션 프레임 요청을 위한 POLYFILL
 //=========================================================================
-if (!window.requestAnimationFrame) { // http://paulirish.com/2011/requestanimationframe-for-smart-animating/
+if (!window.requestAnimationFrame) { // 만약 window.requestAnimationFrame이 정의되지 않았다면 대체 함수 설정
   window.requestAnimationFrame = window.webkitRequestAnimationFrame || 
                                  window.mozRequestAnimationFrame    || 
                                  window.oRequestAnimationFrame      || 
@@ -125,9 +134,9 @@ if (!window.requestAnimationFrame) { // http://paulirish.com/2011/requestanimati
  */
 const Game = {
   run: options => {
-
+    console.log(`run`)
     Game.loadImages(options.images, images => {
-
+      console.log(`callback loadImages`)
       options.ready(images); // 이미지가 로드되었으므로 호출자에게 초기화하도록 알립니다
 
       Game.setKeyListener(options.keys);
@@ -143,6 +152,7 @@ const Game = {
           gdt    = 0;
 
       function frame() {
+        console.log(`frame`)
         now = Util.timestamp();
         dt  = Math.min(1, (now - last) / 1000); // requestAnimationFrame을 사용하면 '휴면'상태로 들어갈 때 발생하는 큰 델타를 처리할 수 있어야 합니다
         gdt = gdt + dt;
@@ -151,31 +161,44 @@ const Game = {
           update(step);
         }
         render();
-        stats.update();
+        // stats.update();
         last = now;
-        requestAnimationFrame(frame, canvas);
+        requestAnimationFrame(frame);
       }
       frame(); // 파티 시작!
-      Game.playMusic();
+      // Game.playMusic();
     });
   },
 
   //---------------------------------------------------------------------------
   // 여러 이미지를 로드하고 모든 이미지가 로드된 경우 콜백하는 메서드
   loadImages: (names, callback) => {
-    let result = [];
-    let count  = names.length;
-
-    let onload = () => {
-      if (--count == 0)
+    console.log(`loadImages`) 
+    let result = []; // 이미지 엘리먼트를 저장할 배열
+    let count  = names.length; // 로드할 이미지의 총 개수
+    console.log(`count : ${count}`)
+    
+    // 각 이미지가 로드될 때 실행될 콜백 함수
+    const onload = () => {
+      console.log(`onload`)
+      if (--count == 0) // 이미지 로드 카운트를 감소시키고, 모든 이미지가 로드되었을 때 콜백 함수 호출
         callback(result);
     };
+    const onerror = () => {
+      console.error(`Error loading image:`);
+      // Handle the error as needed
+    };
+    console.log(`sprites : ${sprites}`);
 
+    // 주어진 이미지 이름에 대해 이미지 엘리먼트를 생성하고 이벤트를 등록하는 루프
     for(let n = 0 ; n < names.length ; n++) {
-      let name = names[n];
-      result[n] = document.createElement('img');
-      Dom.on(result[n], 'load', onload);
-      result[n].src = "images/" + name + ".png";
+      let name = names[n]; // 현재 이미지의 이름
+      result[n] = document.createElement('img'); // 이미지 엘리먼트 생성 및 배열에 저장
+      Dom.on(result[n], 'load', onload); // 이미지 로드 이벤트에 onload 콜백 등록
+      Dom.on(result[n], 'error', onerror);
+      console.log(result)
+      // result[n].src = "/images/" + name + ".png"; // 이미지의 소스 경로 설정
+      result[n].src = images[`${name}`]; // 이미지의 소스 경로 설정
     }
   },
 
@@ -227,18 +250,18 @@ const Game = {
   //---------------------------------------------------------------------------
 
   // 음악 재생 메서드
-  playMusic: () => {
-    let music = Dom.get('music');
-    music.loop = true;
-    music.volume = 0.05; // 소음을 줄이기 위해 볼륨을 낮춤
-    music.muted = (Dom.storage.muted === "true");
-    music.play();
-    Dom.toggleClassName('mute', 'on', music.muted);
-    Dom.on('mute', 'click', function() {
-      Dom.storage.muted = music.muted = !music.muted;
-      Dom.toggleClassName('mute', 'on', music.muted);
-    });
-  }
+  // playMusic: () => {
+  //   let music = Dom.get('music');
+  //   music.loop = true;
+  //   music.volume = 0.05; // 소음을 줄이기 위해 볼륨을 낮춤
+  //   music.muted = (Dom.storage.muted === "true");
+  //   music.play();
+  //   Dom.toggleClassName('mute', 'on', music.muted);
+  //   Dom.on('mute', 'click', function() {
+  //     Dom.storage.muted = music.muted = !music.muted;
+  //     Dom.toggleClassName('mute', 'on', music.muted);
+  //   });
+  // }
 
 }
 
