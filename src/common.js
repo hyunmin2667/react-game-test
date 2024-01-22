@@ -1,13 +1,27 @@
 import Stats from './stats.js';
 import { KEY, COLORS, BACKGROUND, SPRITES } from './gameConstants.js';
+
+// 이미지 불러오기
 import background from './images/background.png';
 import mute from './images/mute.png';
 import sprites from './images/sprites.png';
+import playerStraight from './images/sprites/player_straight.png' // 80 X 41
+import playerLeft from './images/sprites/player_left.png'
+import playerRight from './images/sprites/player_right.png'
+import playerUphillStraight from './images/sprites/player_uphill_straight.png' // 80 X 45
+import playerUphillLeft from './images/sprites/player_uphill_left.png'
+import playerUphillRight from './images/sprites/player_uphill_right.png'
 
 const images = {
   background: background, 
   mute: mute, 
-  sprites: sprites
+  sprites: sprites,
+  playerStraight: playerStraight,
+  playerLeft: playerLeft,
+  playerRight: playerRight,
+  playerUphillStraight: playerUphillStraight,
+  playerUphillLeft: playerUphillLeft,
+  playerUphillRight: playerUphillRight,
 };
 
 //=========================================================================
@@ -19,7 +33,7 @@ const Dom = {
   // 내용 설정
   set:  function(id, html)               { Dom.get(id).innerHTML = html;                        },
   // 이벤트 등록
-  on:   function(ele, type, fn, capture) { Dom.get(ele).addEventListener(type, fn, capture);console.log(`Dom.on`)    },
+  on:   function(ele, type, fn, capture) { Dom.get(ele).addEventListener(type, fn, capture);    },
   // 이벤트 해제
   un:   function(ele, type, fn, capture) { Dom.get(ele).removeEventListener(type, fn, capture); },
   // 요소 표시
@@ -134,25 +148,21 @@ if (!window.requestAnimationFrame) { // 만약 window.requestAnimationFrame이 �
  */
 const Game = {
   run: options => {
-    console.log(`run`)
     Game.loadImages(options.images, images => {
-      console.log(`callback loadImages`)
       options.ready(images); // 이미지가 로드되었으므로 호출자에게 초기화하도록 알립니다
 
       Game.setKeyListener(options.keys);
 
-      let canvas = options.canvas,    // 캔버스 렌더 타겟은 호출자에서 제공됩니다
-          update = options.update,    // 게임 로직을 업데이트하는 메서드는 호출자에서 제공됩니다
+      let update = options.update,    // 게임 로직을 업데이트하는 메서드는 호출자에서 제공됩니다
           render = options.render,    // 게임을 렌더링하는 메서드는 호출자에서 제공됩니다
           step   = options.step,      // 고정 프레임 스텝 (1/fps)은 호출자에서 지정됩니다
-          stats  = options.stats,     // stats 인스턴스는 호출자에서 제공됩니다
+          // stats  = options.stats,     // stats 인스턴스는 호출자에서 제공됩니다
           now    = null,
           last   = Util.timestamp(),
           dt     = 0,
           gdt    = 0;
 
       function frame() {
-        console.log(`frame`)
         now = Util.timestamp();
         dt  = Math.min(1, (now - last) / 1000); // requestAnimationFrame을 사용하면 '휴면'상태로 들어갈 때 발생하는 큰 델타를 처리할 수 있어야 합니다
         gdt = gdt + dt;
@@ -173,32 +183,22 @@ const Game = {
   //---------------------------------------------------------------------------
   // 여러 이미지를 로드하고 모든 이미지가 로드된 경우 콜백하는 메서드
   loadImages: (names, callback) => {
-    console.log(`loadImages`) 
     let result = []; // 이미지 엘리먼트를 저장할 배열
     let count  = names.length; // 로드할 이미지의 총 개수
-    console.log(`count : ${count}`)
     
     // 각 이미지가 로드될 때 실행될 콜백 함수
     const onload = () => {
-      console.log(`onload`)
-      if (--count == 0) // 이미지 로드 카운트를 감소시키고, 모든 이미지가 로드되었을 때 콜백 함수 호출
+      if (--count === 0) // 이미지 로드 카운트를 감소시키고, 모든 이미지가 로드되었을 때 콜백 함수 호출
         callback(result);
     };
-    const onerror = () => {
-      console.error(`Error loading image:`);
-      // Handle the error as needed
-    };
-    console.log(`sprites : ${sprites}`);
-
+    
     // 주어진 이미지 이름에 대해 이미지 엘리먼트를 생성하고 이벤트를 등록하는 루프
     for(let n = 0 ; n < names.length ; n++) {
       let name = names[n]; // 현재 이미지의 이름
       result[n] = document.createElement('img'); // 이미지 엘리먼트 생성 및 배열에 저장
       Dom.on(result[n], 'load', onload); // 이미지 로드 이벤트에 onload 콜백 등록
-      Dom.on(result[n], 'error', onerror);
-      console.log(result)
       // result[n].src = "/images/" + name + ".png"; // 이미지의 소스 경로 설정
-      result[n].src = images[`${name}`]; // 이미지의 소스 경로 설정
+      result[n].src = images[`${name}`]; // important!!!! : react는 빌드 후 src내의 경로가 변경된다!!! 이미지 같은거 import 해서 사용하면 빌드된 경로를 알 수 있다. (onerror 이벤트리스너로 찾았음)
     }
   },
 
@@ -209,8 +209,8 @@ const Game = {
       for(let n = 0 ; n < keys.length ; n++) {
         let k = keys[n];
         k.mode = k.mode || 'up';
-        if ((k.key == keyCode) || (k.keys && (k.keys.indexOf(keyCode) >= 0))) {
-          if (k.mode == mode) {
+        if ((k.key === keyCode) || (k.keys && (k.keys.indexOf(keyCode) >= 0))) {
+          if (k.mode === mode) {
             k.action.call();
           }
         }
@@ -294,7 +294,7 @@ const Render = {
         r2 = Render.rumbleWidth(w2, lanes),
         l1 = Render.laneMarkerWidth(w1, lanes),
         l2 = Render.laneMarkerWidth(w2, lanes),
-        lanew1, lanew2, lanex1, lanex2, lane;
+        lanew1, lanew2, lanex1, lanex2;
 
     // 잔디 영역 그리기
     ctx.fillStyle = color.grass;
@@ -349,7 +349,6 @@ const Render = {
   //---------------------------------------------------------------------------
   // 스프라이트 그리기
   sprite: (ctx, width, height, resolution, roadWidth, sprites, sprite, scale, destX, destY, offsetX, offsetY, clipY) => {
-
     // 프로젝션에 상대적인 크기 및 roadWidth에 상대적인 크기 (토크 UI를 위해) 스케일 조정
     let destW  = (sprite.w * scale * width/2) * (SPRITES.SCALE * roadWidth);
     let destH  = (sprite.h * scale * width/2) * (SPRITES.SCALE * roadWidth);
@@ -371,23 +370,43 @@ const Render = {
   },
 
   //---------------------------------------------------------------------------
-  // 플레이어 차량 그리기
-  player: (ctx, width, height, resolution, roadWidth, sprites, speedPercent, scale, destX, destY, steer, updown) => {
-
+  // 플레이어 차량 그리기 (단일 이미지 사용 가능하게 변경했음)
+  player: (ctx, width, height, resolution, roadWidth, playerSprites, speedPercent, scale, destX, destY, steer, updown) => {
     // 플레이어 차량이 움직일 때 바운스 효과 추가
     let bounce = (1.5 * Math.random() * speedPercent * resolution) * Util.randomChoice([-1,1]);
+    let playerSprite = null
     let sprite;
-
     // 조향에 따라 적절한 스프라이트 선택
-    if (steer < 0)
-      sprite = (updown > 0) ? SPRITES.PLAYER_UPHILL_LEFT : SPRITES.PLAYER_LEFT;
-    else if (steer > 0)
-      sprite = (updown > 0) ? SPRITES.PLAYER_UPHILL_RIGHT : SPRITES.PLAYER_RIGHT;
-    else
-      sprite = (updown > 0) ? SPRITES.PLAYER_UPHILL_STRAIGHT : SPRITES.PLAYER_STRAIGHT;
+    if (steer < 0) {
+      if(updown > 0) {
+        sprite = SPRITES.PLAYER_UPHILL_LEFT;
+        playerSprite = playerSprites.playerUphillLeft;
+      } else {
+        sprite = SPRITES.PLAYER_LEFT;
+        playerSprite = playerSprites.playerLeft;
+      } 
+    }
+    else if (steer > 0) {
+      if(updown > 0) {
+        sprite = SPRITES.PLAYER_UPHILL_RIGHT;
+        playerSprite = playerSprites.playerUphillRight;
+      } else {
+        sprite = SPRITES.PLAYER_RIGHT;
+        playerSprite = playerSprites.playerRight;
+      }
+    }
+    else {
+      if(updown > 0) {
+        sprite = SPRITES.PLAYER_UPHILL_STRAIGHT;
+        playerSprite = playerSprites.playerUphillStraight;
+      } else {
+        sprite = SPRITES.PLAYER_STRAIGHT;
+        playerSprite = playerSprites.playerStraight;
+      }
+    }
 
     // 스프라이트 렌더링
-    Render.sprite(ctx, width, height, resolution, roadWidth, sprites, sprite, scale, destX, destY + bounce, -0.5, -1);
+    Render.sprite(ctx, width, height, resolution, roadWidth, playerSprite, sprite, scale, destX, destY + bounce, -0.5, -1);
   },
 
   //---------------------------------------------------------------------------
