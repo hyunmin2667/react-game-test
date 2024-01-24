@@ -66,7 +66,7 @@ const SPRITES = {
   PLAYER_UPHILL_STRAIGHT: { x: 0, y: 0, w:   80, h:   45 },
   PLAYER_UPHILL_RIGHT:    { x: 0, y: 0, w:   80, h:   45 },
   PLAYER_LEFT:            { x:  0, y:  0, w:   80, h:   41 },
-  PLAYER_STRAIGHT:        { x: 0, y:  0, w:   80, h:   41 },
+  PLAYER_STRAIGHT:        { x: 0, y:  0, w:   80, h:   64 },
   PLAYER_RIGHT:           { x:  0, y:  0, w:   80, h:   41 }
 };
 

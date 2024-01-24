@@ -54,12 +54,6 @@ const Main = (props) => {
     let background     = null;                    // 배경 이미지 (아래에서 로드됨)
     let sprites        = null;                    // 스프라이트 시트 (아래에서 로드됨)
     let playerSprites = {};
-    let playerStraight,                        // 플레이어 스프라이트 (아래에서 로드됨)
-        playerLeft,
-        playerRight,
-        playerUphillStraight,
-        playerUphillLeft,
-        playerUphillRight = null;    
 
     let resolution     = null;                    // 해상도 독립성을 제공하기 위한 스케일링 팩터 (계산됨)
     let roadWidth      = 2000;                    // 사실상 도로의 반폭, 도로가 -roadWidth에서 +roadWidth로 이어지면 수학이 더 간단해짐
@@ -666,21 +660,21 @@ const Main = (props) => {
         { keys: [KEY.UP,    KEY.W], mode: 'up',   action: function() { keyFaster = false; } },
         { keys: [KEY.DOWN,  KEY.S], mode: 'up',   action: function() { keySlower = false; } }
       ],
-      ready: function(imagesObj) {
-        
-        background = imagesObj[0];
-        sprites    = imagesObj[1];
+      ready: function(images) {
+        // imagesObj : 각 이미지 객체오브젝트
+        background = images.background;
+        sprites    = images.sprites;
         playerSprites = {
-          playerStraight: imagesObj[2],
-          playerLeft: imagesObj[3],
-          playerRight: imagesObj[4],
-          playerUphillStraight: imagesObj[5],
-          playerUphillLeft: imagesObj[6],
-          playerUphillRight: imagesObj[7],
+          playerStraight: images.playerStraight,
+          playerLeft: images.playerLeft,
+          playerRight: images.playerRight,
+          playerUphillStraight: images.playerUphillStraight,
+          playerUphillLeft: images.playerUphillLeft,
+          playerUphillRight: images.playerUphillRight,
         }
         reset();
         localStorage.fast_lap_time = localStorage.fast_lap_time || 180;
-        // updateHud('fast_lap_time', formatTime(Util.toFloat(localStorage.fast_lap_time)));
+        updateHud('fast_lap_time', formatTime(Util.toFloat(localStorage.fast_lap_time)));
       }
     });
     

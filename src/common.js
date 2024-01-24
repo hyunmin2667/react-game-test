@@ -11,6 +11,7 @@ import playerRight from './images/sprites/player_right.png'
 import playerUphillStraight from './images/sprites/player_uphill_straight.png' // 80 X 45
 import playerUphillLeft from './images/sprites/player_uphill_left.png'
 import playerUphillRight from './images/sprites/player_uphill_right.png'
+// const playerStraight = [];
 
 const images = {
   background: background, 
@@ -29,23 +30,23 @@ const images = {
 //=========================================================================
 const Dom = {
   // 요소 가져오기
-  get:  function(id)                     { return ((id instanceof HTMLElement) || (id === document)) ? id : document.getElementById(id); },
+  get:  (id) =>                     { return ((id instanceof HTMLElement) || (id === document)) ? id : document.getElementById(id); },
   // 내용 설정
-  set:  function(id, html)               { Dom.get(id).innerHTML = html;                        },
+  set:  (id, html) =>               { Dom.get(id).innerHTML = html;                        },
   // 이벤트 등록
-  on:   function(ele, type, fn, capture) { Dom.get(ele).addEventListener(type, fn, capture);    },
+  on:   (ele, type, fn, capture) => { Dom.get(ele).addEventListener(type, fn, capture);    },
   // 이벤트 해제
-  un:   function(ele, type, fn, capture) { Dom.get(ele).removeEventListener(type, fn, capture); },
+  un:   (ele, type, fn, capture) => { Dom.get(ele).removeEventListener(type, fn, capture); },
   // 요소 표시
-  show: function(ele, type)              { Dom.get(ele).style.display = (type || 'block');      },
+  show: (ele, type) =>              { Dom.get(ele).style.display = (type || 'block');      },
   // 포커스 해제
-  blur: function(ev)                     { ev.target.blur();                                    },
+  blur: (ev) =>                     { ev.target.blur();                                    },
   // 클래스 이름 추가
-  addClassName:    function(ele, name)     { Dom.toggleClassName(ele, name, true);  },
+  addClassName:    (ele, name) =>     { Dom.toggleClassName(ele, name, true);  },
   // 클래스 이름 제거
-  removeClassName: function(ele, name)     { Dom.toggleClassName(ele, name, false); },
+  removeClassName: (ele, name) =>     { Dom.toggleClassName(ele, name, false); },
   // 클래스 이름 토글
-  toggleClassName: function(ele, name, on) {
+  toggleClassName: (ele, name, on) => {
     ele = Dom.get(ele);
     let classes = ele.className.split(' ');
     let n = classes.indexOf(name);
@@ -66,31 +67,31 @@ const Dom = {
 
 const Util = {
   // 현재 타임스탬프 가져오기
-  timestamp:        function()                  { return new Date().getTime();                                    },
+  timestamp:        () =>                  { return new Date().getTime();                                    },
   // 정수로 변환 (기본값 설정 가능)
-  toInt:            function(obj, def)          { if (obj !== null) { let x = parseInt(obj, 10); if (!isNaN(x)) return x; } return Util.toInt(def, 0); },
+  toInt:            (obj, def) =>          { if (obj !== null) { let x = parseInt(obj, 10); if (!isNaN(x)) return x; } return Util.toInt(def, 0); },
   // 부동 소수점 수로 변환 (기본값 설정 가능)
-  toFloat:          function(obj, def)          { if (obj !== null) { let x = parseFloat(obj);   if (!isNaN(x)) return x; } return Util.toFloat(def, 0.0); },
+  toFloat:          (obj, def) =>          { if (obj !== null) { let x = parseFloat(obj);   if (!isNaN(x)) return x; } return Util.toFloat(def, 0.0); },
   // 값을 최소값과 최대값 사이로 제한
-  limit:            function(value, min, max)   { return Math.max(min, Math.min(value, max));                     },
+  limit:            (value, min, max) =>   { return Math.max(min, Math.min(value, max));                     },
   // 두 값 사이의 무작위 정수 생성
-  randomInt:        function(min, max)          { return Math.round(Util.interpolate(min, max, Math.random()));   },
+  randomInt:        (min, max) =>          { return Math.round(Util.interpolate(min, max, Math.random()));   },
   // 주어진 옵션 중에서 무작위 선택
-  randomChoice:     function(options)           { return options[Util.randomInt(0, options.length-1)];            },
+  randomChoice:     (options) =>           { return options[Util.randomInt(0, options.length-1)];            },
   // 퍼센트 남은 값 계산
-  percentRemaining: function(n, total)          { return (n%total)/total;                                         },
+  percentRemaining: (n, total) =>          { return (n%total)/total;                                         },
   // 가속도에 따른 속도 계산
-  accelerate:       function(v, accel, dt)      { return v + (accel * dt);                                        },
+  accelerate:       (v, accel, dt) =>      { return v + (accel * dt);                                        },
   // 두 값 사이를 보간
-  interpolate:      function(a,b,percent)       { return a + (b-a)*percent                                        },
+  interpolate:      (a,b,percent) =>       { return a + (b-a)*percent                                        },
   // 이징 함수 (easeIn)
-  easeIn:           function(a,b,percent)       { return a + (b-a)*Math.pow(percent,2);                           },
+  easeIn:           (a,b,percent) =>       { return a + (b-a)*Math.pow(percent,2);                           },
   // 이징 함수 (easeOut)
-  easeOut:          function(a,b,percent)       { return a + (b-a)*(1-Math.pow(1-percent,2));                     },
+  easeOut:          (a,b,percent) =>       { return a + (b-a)*(1-Math.pow(1-percent,2));                     },
   // 이징 함수 (easeInOut)
-  easeInOut:        function(a,b,percent)       { return a + (b-a)*((-Math.cos(percent*Math.PI)/2) + 0.5);        },
+  easeInOut:        (a,b,percent) =>       { return a + (b-a)*((-Math.cos(percent*Math.PI)/2) + 0.5);        },
   // 지수 포그 함수
-  exponentialFog:   function(distance, density) { return 1 / (Math.pow(Math.E, (distance * distance * density))); },
+  exponentialFog:   (distance, density) => { return 1 / (Math.pow(Math.E, (distance * distance * density))); },
 
   // 값 증가 (루핑 가능)
   increase:  (start, increment, max) => { // with looping
@@ -148,6 +149,7 @@ if (!window.requestAnimationFrame) { // 만약 window.requestAnimationFrame이 �
  */
 const Game = {
   run: options => {
+    // options.images => ["background", "sprites", "playerStraight", "playerLeft", "playerRight", "playerUphillStraight", "playerUphillLeft", "playerUphillRight"],
     Game.loadImages(options.images, images => {
       options.ready(images); // 이미지가 로드되었으므로 호출자에게 초기화하도록 알립니다
 
@@ -162,7 +164,7 @@ const Game = {
           dt     = 0,
           gdt    = 0;
 
-      function frame() {
+      const frame = () => {
         now = Util.timestamp();
         dt  = Math.min(1, (now - last) / 1000); // requestAnimationFrame을 사용하면 '휴면'상태로 들어갈 때 발생하는 큰 델타를 처리할 수 있어야 합니다
         gdt = gdt + dt;
@@ -183,7 +185,8 @@ const Game = {
   //---------------------------------------------------------------------------
   // 여러 이미지를 로드하고 모든 이미지가 로드된 경우 콜백하는 메서드
   loadImages: (names, callback) => {
-    let result = []; // 이미지 엘리먼트를 저장할 배열
+    // names => ["background", "sprites", "playerStraight", "playerLeft", "playerRight", "playerUphillStraight", "playerUphillLeft", 
+    let result = {}; // 이미지 엘리먼트를 저장할 배열
     let count  = names.length; // 로드할 이미지의 총 개수
     
     // 각 이미지가 로드될 때 실행될 콜백 함수
@@ -195,10 +198,12 @@ const Game = {
     // 주어진 이미지 이름에 대해 이미지 엘리먼트를 생성하고 이벤트를 등록하는 루프
     for(let n = 0 ; n < names.length ; n++) {
       let name = names[n]; // 현재 이미지의 이름
-      result[n] = document.createElement('img'); // 이미지 엘리먼트 생성 및 배열에 저장
-      Dom.on(result[n], 'load', onload); // 이미지 로드 이벤트에 onload 콜백 등록
-      // result[n].src = "/images/" + name + ".png"; // 이미지의 소스 경로 설정
-      result[n].src = images[`${name}`]; // important!!!! : react는 빌드 후 src내의 경로가 변경된다!!! 이미지 같은거 import 해서 사용하면 빌드된 경로를 알 수 있다. (onerror 이벤트리스너로 찾았음)
+      result[name] = document.createElement('img'); // 이미지 엘리먼트 생성 및 배열에 저장
+      Dom.on(result[name], 'load', onload); // 이미지 로드 이벤트에 onload 콜백 등록
+      // result[name].src = "/images/" + name + ".png"; // 이미지의 소스 경로 설정
+      // result[name].src = "/images/" + name + ".png"; // 이미지의 소스 경로 설정
+      
+      result[name].src = images[`${name}`]; // important!!!! : react는 빌드 후 src내의 경로가 변경된다!!! 이미지 같은거 import 해서 사용하면 빌드된 경로를 알 수 있다. (onerror 이벤트리스너로 찾았음)
     }
   },
 
@@ -216,8 +221,8 @@ const Game = {
         }
       }
     };
-    Dom.on(document, 'keydown', function(ev) { onkey(ev.keyCode, 'down'); } );
-    Dom.on(document, 'keyup',   function(ev) { onkey(ev.keyCode, 'up');   } );
+    Dom.on(document, 'keydown', (ev) => { onkey(ev.keyCode, 'down'); } );
+    Dom.on(document, 'keyup',   (ev) => { onkey(ev.keyCode, 'up');   } );
   },
 
   //---------------------------------------------------------------------------
@@ -373,7 +378,8 @@ const Render = {
   // 플레이어 차량 그리기 (단일 이미지 사용 가능하게 변경했음)
   player: (ctx, width, height, resolution, roadWidth, playerSprites, speedPercent, scale, destX, destY, steer, updown) => {
     // 플레이어 차량이 움직일 때 바운스 효과 추가
-    let bounce = (1.5 * Math.random() * speedPercent * resolution) * Util.randomChoice([-1,1]);
+    // let bounce = (1.5 * Math.random() * speedPercent * resolution) * Util.randomChoice([-1,1]);
+    let bounce = 0;
     let playerSprite = null
     let sprite;
     // 조향에 따라 적절한 스프라이트 선택
