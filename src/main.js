@@ -395,6 +395,7 @@ const Main = (props) => {
     
         // 플레이어가 속한 세그먼트인 경우 플레이어 렌더링
         if (segment === playerSegment) {
+          
           Render.player(ctx, width, height, resolution, roadWidth, playerSprites, speed/maxSpeed,
                         cameraDepth/playerZ,
                         width/2,
@@ -541,7 +542,7 @@ const Main = (props) => {
     function resetRoad() {
       segments = [];
     
-      addStraight(ROAD.LENGTH.SHORT);
+      addStraight(ROAD.LENGTH.LONG);
       addLowRollingHills();
       addSCurves();
       addCurve(ROAD.LENGTH.MEDIUM, ROAD.CURVE.MEDIUM, ROAD.HILL.LOW);
@@ -646,7 +647,6 @@ const Main = (props) => {
     
     // 게임 실행 및 초기화
     Game.run({
-      
       // canvas: canvas, render: render, update: update, stats: stats, step: step,
       canvas: canvas, render: render, update: update, step: step,
       images: ["background", "sprites", "playerStraight", "playerLeft", "playerRight", "playerUphillStraight", "playerUphillLeft", "playerUphillRight"],
@@ -665,7 +665,7 @@ const Main = (props) => {
         background = images.background;
         sprites    = images.sprites;
         playerSprites = {
-          playerStraight: images.playerStraight,
+          playerStraight: images.playerStraight, // 배열임
           playerLeft: images.playerLeft,
           playerRight: images.playerRight,
           playerUphillStraight: images.playerUphillStraight,

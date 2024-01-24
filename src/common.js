@@ -13,6 +13,7 @@ import playerUphillLeft from './images/sprites/player_uphill_left.png'
 import playerUphillRight from './images/sprites/player_uphill_right.png'
 // const playerStraight = [];
 
+let straightCount = 0; // Render.player count
 const images = {
   background: background, 
   mute: mute, 
@@ -198,12 +199,24 @@ const Game = {
     // 주어진 이미지 이름에 대해 이미지 엘리먼트를 생성하고 이벤트를 등록하는 루프
     for(let n = 0 ; n < names.length ; n++) {
       let name = names[n]; // 현재 이미지의 이름
-      result[name] = document.createElement('img'); // 이미지 엘리먼트 생성 및 배열에 저장
-      Dom.on(result[name], 'load', onload); // 이미지 로드 이벤트에 onload 콜백 등록
-      // result[name].src = "/images/" + name + ".png"; // 이미지의 소스 경로 설정
-      // result[name].src = "/images/" + name + ".png"; // 이미지의 소스 경로 설정
-      
-      result[name].src = images[`${name}`]; // important!!!! : react는 빌드 후 src내의 경로가 변경된다!!! 이미지 같은거 import 해서 사용하면 빌드된 경로를 알 수 있다. (onerror 이벤트리스너로 찾았음)
+      if(name === "playerStraight") {
+        result[name] = []
+        // straight 이미지 20장 배열에 담기
+        for (let i = 0; i < 20; i++) {
+          result[name].push(document.createElement('img'));
+          Dom.on(result[name][i], 'load', onload);
+          result[name][i].src = `/pug_run/pug_run_00${i > 9 ? i : '0' + i}.png`;
+          console.log(result[name][i].src)
+        }
+
+      } else {
+        result[name] = document.createElement('img'); // 이미지 엘리먼트 생성 및 배열에 저장
+        Dom.on(result[name], 'load', onload); // 이미지 로드 이벤트에 onload 콜백 등록
+        // result[name].src = "/images/" + name + ".png"; // 이미지의 소스 경로 설정
+        // result[name].src = "/images/" + name + ".png"; // 이미지의 소스 경로 설정
+        
+        result[name].src = images[`${name}`]; // important!!!! : react는 빌드 후 src내의 경로가 변경된다!!! 이미지 같은거 import 해서 사용하면 빌드된 경로를 알 수 있다. (onerror 이벤트리스너로 찾았음)
+      }
     }
   },
 
@@ -383,6 +396,10 @@ const Render = {
     let playerSprite = null
     let sprite;
     // 조향에 따라 적절한 스프라이트 선택
+    
+    if (straightCount++ > 18) straightCount = 0;
+    // console.log(`straightCount : ${straightCount}`)
+
     if (steer < 0) {
       if(updown > 0) {
         sprite = SPRITES.PLAYER_UPHILL_LEFT;
@@ -399,6 +416,7 @@ const Render = {
       } else {
         sprite = SPRITES.PLAYER_RIGHT;
         playerSprite = playerSprites.playerRight;
+        // console.log(playerSprite);
       }
     }
     else {
@@ -407,7 +425,9 @@ const Render = {
         playerSprite = playerSprites.playerUphillStraight;
       } else {
         sprite = SPRITES.PLAYER_STRAIGHT;
-        playerSprite = playerSprites.playerStraight;
+        playerSprite = playerSprites.playerStraight[straightCount]; // straight 총 20장
+        // console.log(playerSprite);
+        // console.log(`straightCount : ${straightCount}`);
       }
     }
 
