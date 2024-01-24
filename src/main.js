@@ -1,6 +1,7 @@
 // import io from "socket.io-client";
 import { useRef, useEffect } from 'react'
 import { Dom, Util, Game, Render, KEY, COLORS, BACKGROUND, SPRITES } from './common.js';
+import { PLAYER_SPRITE } from './gameConstants.js';
 
 const localStorage = window.localStorage || {};
 
@@ -96,7 +97,7 @@ const Main = (props) => {
     // UPDATE THE GAME WORLD
     //=========================================================================
     
-    function update(dt) {
+    const update = (dt) => {
       
       // 데이터 보내기
       // console.log("데이터 보냄!!")
@@ -206,7 +207,7 @@ const Main = (props) => {
     
     //-------------------------------------------------------------------------
     
-    function updateCars(dt, playerSegment, playerW) {
+    const updateCars = (dt, playerSegment, playerW) => {
       
       let car, oldSegment, newSegment;
       for(let n = 0 ; n < cars.length ; n++) {
@@ -233,7 +234,7 @@ const Main = (props) => {
     
     }
     
-    // function updateCarOffset(car, carSegment, playerSegment, playerW) {
+    // const updateCarOffset = (car, carSegment, playerSegment, playerW) {
       
     //   let dir, segment, otherCar, otherCarW, lookahead = 20, carW = car.sprite.w * SPRITES.SCALE;
     
@@ -290,7 +291,7 @@ const Main = (props) => {
     
     //-------------------------------------------------------------------------
     
-    function updateHud(key, value) {
+    const updateHud = (key, value) => {
       // DOM 접근은 느릴 수 있으므로 값이 변경되었을 때만 수행합니다.
       if (hud[key].value !== value) {
         hud[key].value = value;
@@ -298,7 +299,7 @@ const Main = (props) => {
       }
     }
     
-    function formatTime(dt) {
+    const formatTime = (dt) => {
       let minutes = Math.floor(dt/60);
       let seconds = Math.floor(dt - (minutes * 60));
       let tenths  = Math.floor(10 * (dt - Math.floor(dt)));
@@ -315,7 +316,7 @@ const Main = (props) => {
     // RENDER THE GAME WORLD
     //=========================================================================
     
-    function render() {
+    const render = () => {
       // 초기화
       let baseSegment   = findSegment(position);
       let basePercent   = Util.percentRemaining(position, segmentLength);
@@ -406,7 +407,7 @@ const Main = (props) => {
       }
     }
     
-    function findSegment(z) {
+    const findSegment = z => {
       // 현재 위치 z에 해당하는 세그먼트 반환
       return segments[Math.floor(z/segmentLength) % segments.length]; 
     }
@@ -414,9 +415,9 @@ const Main = (props) => {
     //=========================================================================
     // 도로 지오메트리 구축
     //=========================================================================
-    function lastY() { return (segments.length === 0) ? 0 : segments[segments.length-1].p2.world.y; }
+    const lastY = () => { return (segments.length === 0) ? 0 : segments[segments.length-1].p2.world.y; }
     
-    function addSegment(curve, y) {
+    const addSegment = (curve, y) => {
       // 새로운 세그먼트를 배열에 추가
       let n = segments.length;
       segments.push({
@@ -431,12 +432,12 @@ const Main = (props) => {
     }
     
     // 세그먼트에 스프라이트 추가
-    function addSprite(n, sprite, offset) {
+    const addSprite = (n, sprite, offset) => {
       segments[n].sprites.push({ source: sprite, offset: offset });
     }
     
     // 도로 추가
-    function addRoad(enter, hold, leave, curve, y) {
+    const addRoad = (enter, hold, leave, curve, y) => {
       let startY   = lastY();
       let endY     = startY + (Util.toInt(y, 0) * segmentLength);
       let total = enter + hold + leave;
@@ -459,7 +460,7 @@ const Main = (props) => {
      * 지정된 길이의 직선 도로 세그먼트를 추가합니다.
      * @param {number} num - 직선 도로 세그먼트의 길이.
      */
-    function addStraight(num) {
+    const addStraight = num => {
       num = num || ROAD.LENGTH.MEDIUM;
       addRoad(num, num, num, 0, 0);
     }
@@ -469,7 +470,7 @@ const Main = (props) => {
      * @param {number} num - 언덕의 길이.
      * @param {number} height - 언덕의 높이.
      */
-    function addHill(num, height) {
+    const addHill = (num, height) => {
       num    = num    || ROAD.LENGTH.MEDIUM;
       height = height || ROAD.HILL.MEDIUM;
       addRoad(num, num, num, 0, height);
@@ -481,7 +482,7 @@ const Main = (props) => {
      * @param {number} curve - 커브의 강도.
      * @param {number} height - 언덕의 높이.
      */
-    function addCurve(num, curve, height) {
+    const addCurve = (num, curve, height) => {
       num    = num    || ROAD.LENGTH.MEDIUM;
       curve  = curve  || ROAD.CURVE.MEDIUM;
       height = height || ROAD.HILL.NONE;
@@ -493,7 +494,7 @@ const Main = (props) => {
      * @param {number} num - 언덕 시퀀스의 길이.
      * @param {number} height - 언덕의 높이.
      */
-    function addLowRollingHills(num, height) {
+    const addLowRollingHills = (num, height) => {
       num    = num    || ROAD.LENGTH.SHORT;
       height = height || ROAD.HILL.LOW;
       addRoad(num, num, num,  0,                height/2);
@@ -507,7 +508,7 @@ const Main = (props) => {
     /**
      * S 모양 곡선의 시퀀스를 추가합니다.
      */
-    function addSCurves() {
+    const addSCurves = () => {
       addRoad(ROAD.LENGTH.MEDIUM, ROAD.LENGTH.MEDIUM, ROAD.LENGTH.MEDIUM,  -ROAD.CURVE.EASY,    ROAD.HILL.NONE);
       addRoad(ROAD.LENGTH.MEDIUM, ROAD.LENGTH.MEDIUM, ROAD.LENGTH.MEDIUM,   ROAD.CURVE.MEDIUM,  ROAD.HILL.MEDIUM);
       addRoad(ROAD.LENGTH.MEDIUM, ROAD.LENGTH.MEDIUM, ROAD.LENGTH.MEDIUM,   ROAD.CURVE.EASY,   -ROAD.HILL.LOW);
@@ -518,7 +519,7 @@ const Main = (props) => {
     /**
      * 도로에 덤핑이 추가된 시퀀스를 추가합니다.
      */
-    function addBumps() {
+    const addBumps = () => {
       addRoad(10, 10, 10, 0,  5);
       addRoad(10, 10, 10, 0, -2);
       addRoad(10, 10, 10, 0, -5);
@@ -533,13 +534,13 @@ const Main = (props) => {
      * 지정된 길이의 하강하는 도로 세그먼트를 추가하여 끝까지 이어집니다.
      * @param {number} num - 하강 도로 세그먼트의 길이.
      */
-    function addDownhillToEnd(num) {
+    const addDownhillToEnd = num => {
       num = num || 200;
       addRoad(num, num, num, -ROAD.CURVE.EASY, -lastY()/segmentLength);
     }
     
     
-    function resetRoad() {
+    const resetRoad = () => {
       segments = [];
     
       addStraight(ROAD.LENGTH.LONG);
@@ -575,7 +576,7 @@ const Main = (props) => {
       trackLength = segments.length * segmentLength;
     }
     
-    function resetSprites() {
+    const resetSprites = () => {
       // 고정된 위치에 각종 스프라이트 추가
       addSprite(20,  SPRITES.BILLBOARD07, -1);
       addSprite(40,  SPRITES.BILLBOARD06, -1);
@@ -624,7 +625,7 @@ const Main = (props) => {
     
     }
     
-    function resetCars() {
+    const resetCars = () => {
       cars = [];
       let car, segment, offset, z, sprite, speed;
       for (let n = 0 ; n < totalCars ; n++) {
@@ -649,7 +650,7 @@ const Main = (props) => {
     Game.run({
       // canvas: canvas, render: render, update: update, stats: stats, step: step,
       canvas: canvas, render: render, update: update, step: step,
-      images: ["background", "sprites", "playerStraight", "playerLeft", "playerRight", "playerUphillStraight", "playerUphillLeft", "playerUphillRight"],
+      images: ["background", "sprites", "playerSpriteNames"],
       keys: [
         { keys: [KEY.LEFT,  KEY.A], mode: 'down', action: function() { keyLeft   = true;  } },
         { keys: [KEY.RIGHT, KEY.D], mode: 'down', action: function() { keyRight  = true;  } },
@@ -660,18 +661,13 @@ const Main = (props) => {
         { keys: [KEY.UP,    KEY.W], mode: 'up',   action: function() { keyFaster = false; } },
         { keys: [KEY.DOWN,  KEY.S], mode: 'up',   action: function() { keySlower = false; } }
       ],
-      ready: function(images) {
-        // imagesObj : 각 이미지 객체오브젝트
+      ready: images => { // images === loadImages의 result
+        // ==> images[spriteName][action.name][direction] === <img>
         background = images.background;
         sprites    = images.sprites;
-        playerSprites = {
-          playerStraight: images.playerStraight, // 배열임
-          playerLeft: images.playerLeft,
-          playerRight: images.playerRight,
-          playerUphillStraight: images.playerUphillStraight,
-          playerUphillLeft: images.playerUphillLeft,
-          playerUphillRight: images.playerUphillRight,
-        }
+        PLAYER_SPRITE.NAMES.forEach( (name) => {
+          playerSprites[name] = images[name];
+        })
         reset();
         localStorage.fast_lap_time = localStorage.fast_lap_time || 180;
         updateHud('fast_lap_time', formatTime(Util.toFloat(localStorage.fast_lap_time)));
@@ -682,7 +678,7 @@ const Main = (props) => {
      * 게임 초기화 함수. 옵션에 따라 게임의 초기 상태를 설정합니다.
      * @param {Object} options - 게임 초기화 옵션.
      */
-    function reset(options) {
+    const reset = options => {
       options       = options || {};
       canvas.width  = width  = Util.toInt(options.width,          width);
       canvas.height = height = Util.toInt(options.height,         height);
@@ -735,7 +731,7 @@ const Main = (props) => {
     Dom.on('fogDensity',     'change', function(ev) { Dom.blur(ev); reset({ fogDensity:    Util.limit(Util.toInt(ev.target.value), Util.toInt(ev.target.getAttribute('min')), Util.toInt(ev.target.getAttribute('max'))) }); });
     
     // UI 업데이트 함수
-    function refreshTweakUI() {
+    const refreshTweakUI = () => {
       Dom.get('lanes').selectedIndex = lanes-1;
       Dom.get('currentRoadWidth').innerHTML      = Dom.get('roadWidth').value      = roadWidth;
       Dom.get('currentCameraHeight').innerHTML   = Dom.get('cameraHeight').value   = cameraHeight;

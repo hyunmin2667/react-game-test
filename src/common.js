@@ -1,29 +1,24 @@
 import Stats from './stats.js';
-import { KEY, COLORS, BACKGROUND, SPRITES } from './gameConstants.js';
+import { PLAYER_SPRITE, KEY, COLORS, BACKGROUND, SPRITES } from './gameConstants.js';
 
 // 이미지 불러오기
 import background from './images/background.png';
 import mute from './images/mute.png';
 import sprites from './images/sprites.png';
-import playerStraight from './images/sprites/player_straight.png' // 80 X 41
-import playerLeft from './images/sprites/player_left.png'
-import playerRight from './images/sprites/player_right.png'
-import playerUphillStraight from './images/sprites/player_uphill_straight.png' // 80 X 45
-import playerUphillLeft from './images/sprites/player_uphill_left.png'
-import playerUphillRight from './images/sprites/player_uphill_right.png'
-// const playerStraight = [];
 
-let straightCount = 0; // Render.player count
+const selectPlayer = "horse";
+const selectAction = "run";
+const frameIndex = {
+  run: 0
+}
+const totalsFrames = {
+  run: 21
+}
+
 const images = {
   background: background, 
   mute: mute, 
-  sprites: sprites,
-  playerStraight: playerStraight,
-  playerLeft: playerLeft,
-  playerRight: playerRight,
-  playerUphillStraight: playerUphillStraight,
-  playerUphillLeft: playerUphillLeft,
-  playerUphillRight: playerUphillRight,
+  sprites: sprites
 };
 
 //=========================================================================
@@ -186,33 +181,78 @@ const Game = {
   //---------------------------------------------------------------------------
   // 여러 이미지를 로드하고 모든 이미지가 로드된 경우 콜백하는 메서드
   loadImages: (names, callback) => {
-    // names => ["background", "sprites", "playerStraight", "playerLeft", "playerRight", "playerUphillStraight", "playerUphillLeft", 
-    let result = {}; // 이미지 엘리먼트를 저장할 배열
-    let count  = names.length; // 로드할 이미지의 총 개수
-    
+    // names => ["background", "sprites", "playerSpriteNames"]
+    // const PLAYER_SPRITE.NAMES = [ "pug", "sheep", "pig", "cow", "llama", "horse", "zebra"]
+    const result = {}; // 이미지 엘리먼트를 저장할 배열
+    // 로드할 이미지의 총 개수
+    let count = names.length - 1 + 3;
+    // count += PLAYER_SPRITE.NAMES.length * PLAYER_SPRITE.ACTIONS.length * PLAYER_SPRITE.DIRECTIONS.length;       
+    // SPRITES["pug"]["run"]["straight"].push({x,y,w,h});
+
+
     // 각 이미지가 로드될 때 실행될 콜백 함수
     const onload = () => {
-      if (--count === 0) // 이미지 로드 카운트를 감소시키고, 모든 이미지가 로드되었을 때 콜백 함수 호출
-        callback(result);
+      if (--count === 0) {
+        callback(result); // 이미지 로드 카운트를 감소시키고, 모든 이미지가 로드되었을 때 콜백 함수 호출
+        // console.log(count)
+      }
     };
+
+    // 플레이어 스프라이트에 대한 정보를 가져와서 SPRITE객체에 이미지에 대한 정보를 저장하는 함수
+    const setPlayerSprite = () => {
+      // 모든 객체 in 객체 초기화 진행
+      PLAYER_SPRITE.NAMES.forEach( spriteName => {
+        SPRITES[spriteName] = {}
+        result[spriteName] = {}
+        PLAYER_SPRITE.ACTIONS.forEach( action => {
+          SPRITES[spriteName][action.name] = {}
+          result[spriteName][action.name] = {}
+          PLAYER_SPRITE.DIRECTIONS.forEach( direction => {
+            SPRITES[spriteName][action.name][direction] = []
+          })
+        })
+      })
+
+      
+      PLAYER_SPRITE.NAMES.forEach( spriteName => {
+        PLAYER_SPRITE.ACTIONS.forEach( action => {
+          PLAYER_SPRITE.DIRECTIONS.forEach( direction => {
+            const frameSize = 300; // 300px X 300px 고정사이즈로 정함함
+            const totalFrames = action.frames;
+            for(let frameIndex = 0; frameIndex < totalFrames; frameIndex++) {
+              // SPRITES.동물이름.액션[이름].방향 : [{x, y, w, h}, {x, y, w, h}, {x, y, w, h}]
+              // SPRITES.spriteName[action.name].direction: [{x, y, w, h}, {x, y, w, h}, {x, y, w, h}]
+              SPRITES[spriteName][action.name][direction].push({ 
+                x: frameIndex * frameSize,
+                y: 0, w: frameSize, h: frameSize
+              });
+
+              result[spriteName][action.name][direction] = document.createElement('img');
+              
+              if (result[spriteName][action.name][direction] !== null) {
+                Dom.on(result[spriteName][action.name][direction], 'load', onload);
+                result[spriteName][action.name][direction].src =
+                  `/images/sheets/${spriteName}_${action.name}_${direction}.png`;
+              }
+            }
+          })
+        })
+      })
+    }
+
     
+
+
     // 주어진 이미지 이름에 대해 이미지 엘리먼트를 생성하고 이벤트를 등록하는 루프
     for(let n = 0 ; n < names.length ; n++) {
       let name = names[n]; // 현재 이미지의 이름
-      if(name === "playerStraight") {
-        result[name] = []
-        // straight 이미지 20장 배열에 담기
-        for (let i = 0; i < 20; i++) {
-          result[name].push(document.createElement('img'));
-          Dom.on(result[name][i], 'load', onload);
-          result[name][i].src = `/pug_run/pug_run_00${i > 9 ? i : '0' + i}.png`;
-          console.log(result[name][i].src)
-        }
-
+      
+      // 플레이어들에 대한 이미지 생성하기
+      if (name === "playerSpriteNames") {
+        setPlayerSprite();
       } else {
         result[name] = document.createElement('img'); // 이미지 엘리먼트 생성 및 배열에 저장
         Dom.on(result[name], 'load', onload); // 이미지 로드 이벤트에 onload 콜백 등록
-        // result[name].src = "/images/" + name + ".png"; // 이미지의 소스 경로 설정
         // result[name].src = "/images/" + name + ".png"; // 이미지의 소스 경로 설정
         
         result[name].src = images[`${name}`]; // important!!!! : react는 빌드 후 src내의 경로가 변경된다!!! 이미지 같은거 import 해서 사용하면 빌드된 경로를 알 수 있다. (onerror 이벤트리스너로 찾았음)
@@ -367,6 +407,7 @@ const Render = {
   //---------------------------------------------------------------------------
   // 스프라이트 그리기
   sprite: (ctx, width, height, resolution, roadWidth, sprites, sprite, scale, destX, destY, offsetX, offsetY, clipY) => {
+    
     // 프로젝션에 상대적인 크기 및 roadWidth에 상대적인 크기 (토크 UI를 위해) 스케일 조정
     let destW  = (sprite.w * scale * width/2) * (SPRITES.SCALE * roadWidth);
     let destH  = (sprite.h * scale * width/2) * (SPRITES.SCALE * roadWidth);
@@ -393,46 +434,35 @@ const Render = {
     // 플레이어 차량이 움직일 때 바운스 효과 추가
     // let bounce = (1.5 * Math.random() * speedPercent * resolution) * Util.randomChoice([-1,1]);
     let bounce = 0;
-    let playerSprite = null
+    let imageObj = null
+    let direction;
     let sprite;
-    // 조향에 따라 적절한 스프라이트 선택
+
     
-    if (straightCount++ > 18) straightCount = 0;
-    // console.log(`straightCount : ${straightCount}`)
+    // SPRITES.동물이름.액션이름.방향 : [{x, y, w, h}, {x, y, w, h}, {x, y, w, h}]
+    // SPRITES.spriteName[action.name].direction: [{x, y, w, h}, {x, y, w, h}, {x, y, w, h}]
 
-    if (steer < 0) {
-      if(updown > 0) {
-        sprite = SPRITES.PLAYER_UPHILL_LEFT;
-        playerSprite = playerSprites.playerUphillLeft;
-      } else {
-        sprite = SPRITES.PLAYER_LEFT;
-        playerSprite = playerSprites.playerLeft;
-      } 
-    }
-    else if (steer > 0) {
-      if(updown > 0) {
-        sprite = SPRITES.PLAYER_UPHILL_RIGHT;
-        playerSprite = playerSprites.playerUphillRight;
-      } else {
-        sprite = SPRITES.PLAYER_RIGHT;
-        playerSprite = playerSprites.playerRight;
-        // console.log(playerSprite);
-      }
-    }
-    else {
-      if(updown > 0) {
-        sprite = SPRITES.PLAYER_UPHILL_STRAIGHT;
-        playerSprite = playerSprites.playerUphillStraight;
-      } else {
-        sprite = SPRITES.PLAYER_STRAIGHT;
-        playerSprite = playerSprites.playerStraight[straightCount]; // straight 총 20장
-        // console.log(playerSprite);
-        // console.log(`straightCount : ${straightCount}`);
-      }
-    }
+    // playerSprites[selectPlayer][action.name][direction] === <img></img>
 
+    frameIndex[selectAction] = (frameIndex[selectAction] + 1) % totalsFrames[selectAction]; // 프레임idx 증가(최대 값 넘으면 0으로)
+    
+    // 조향에 따라 적절한 스프라이트 선택
+    if (steer < 0) {          // 왼쪽
+      if(updown > 0) direction = "uphillLeft"
+      else direction = "left"
+    } else if (steer > 0) {   // 오른쪽
+      if(updown > 0) direction = "uphillRight"
+      else direction = "right"
+    } else {                  // 가운데
+      if(updown > 0) direction = "uphillStraight"
+      else direction = "straight"
+    }
+    imageObj = playerSprites[selectPlayer][selectAction][direction]; // 이미지객체
+    sprite       = SPRITES[selectPlayer][selectAction][direction][frameIndex[selectAction]] // 좌표 정보(잘라내기정보)
+    // console.log(imageObj)
+    // console.log(sprite)
     // 스프라이트 렌더링
-    Render.sprite(ctx, width, height, resolution, roadWidth, playerSprite, sprite, scale, destX, destY + bounce, -0.5, -1);
+    Render.sprite(ctx, width, height, resolution, roadWidth, imageObj, sprite, scale, destX, destY + bounce, -0.5, -1);
   },
 
   //---------------------------------------------------------------------------
