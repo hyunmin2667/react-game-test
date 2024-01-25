@@ -2,6 +2,7 @@
 import { useRef, useEffect } from 'react'
 import { Dom, Util, Game, Render, KEY, COLORS, BACKGROUND, SPRITES } from './common.js';
 import { PLAYER_SPRITE } from './gameConstants.js';
+import { data } from './data.js';
 
 const localStorage = window.localStorage || {};
 
@@ -81,8 +82,8 @@ const Main = (props) => {
     let currentLapTime = 0;                       // 현재 랩 타임
     let lastLapTime    = null;                    // 마지막 랩 타임
     
-    let keyLeft        = false;
-    let keyRight       = false;
+    let keyLeft        = data.isLeftKeyPressed;
+    let keyRight       = data.isRightKeyPressed;
     let keyFaster      = false;
     let keySlower      = false;
     
@@ -98,7 +99,8 @@ const Main = (props) => {
     //=========================================================================
     
     const update = (dt) => {
-      
+      keyLeft        = data.isLeftKeyPressed;
+      keyRight       = data.isRightKeyPressed;
       // 데이터 보내기
       // console.log("데이터 보냄!!")
       playerData[playerNumber].userX = playerX;
@@ -652,12 +654,12 @@ const Main = (props) => {
       canvas: canvas, render: render, update: update, step: step,
       images: ["background", "sprites", "playerSpriteNames"],
       keys: [
-        { keys: [KEY.LEFT,  KEY.A], mode: 'down', action: function() { keyLeft   = true;  } },
-        { keys: [KEY.RIGHT, KEY.D], mode: 'down', action: function() { keyRight  = true;  } },
+        // { keys: [KEY.LEFT,  KEY.A], mode: 'down', action: function() { keyLeft   = true;  } },
+        // { keys: [KEY.RIGHT, KEY.D], mode: 'down', action: function() { keyRight  = true;  } },
         { keys: [KEY.UP,    KEY.W], mode: 'down', action: function() { keyFaster = true;  } },
         { keys: [KEY.DOWN,  KEY.S], mode: 'down', action: function() { keySlower = true;  } },
-        { keys: [KEY.LEFT,  KEY.A], mode: 'up',   action: function() { keyLeft   = false; } },
-        { keys: [KEY.RIGHT, KEY.D], mode: 'up',   action: function() { keyRight  = false; } },
+        // { keys: [KEY.LEFT,  KEY.A], mode: 'up',   action: function() { keyLeft   = false; } },
+        // { keys: [KEY.RIGHT, KEY.D], mode: 'up',   action: function() { keyRight  = false; } },
         { keys: [KEY.UP,    KEY.W], mode: 'up',   action: function() { keyFaster = false; } },
         { keys: [KEY.DOWN,  KEY.S], mode: 'up',   action: function() { keySlower = false; } }
       ],

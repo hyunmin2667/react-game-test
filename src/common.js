@@ -6,7 +6,7 @@ import background from './images/background.png';
 import mute from './images/mute.png';
 import sprites from './images/sprites.png';
 
-const selectPlayer = "horse";
+const selectPlayer = "pig";
 const selectAction = "run";
 const frameIndex = {
   run: 0
