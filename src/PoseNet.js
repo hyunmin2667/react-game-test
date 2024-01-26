@@ -1,13 +1,18 @@
 import { useRef } from 'react';
 import "./App.css";
-// import * as tf from "@tensorflow/tfjs";
-import "@tensorflow/tfjs";
+import * as tf from "@tensorflow/tfjs";
+// import "@tensorflow/tfjs";
 import * as posenet from "@tensorflow-models/posenet";
 import Webcam from "react-webcam";
 import { drawKeypoints, drawSkeleton } from './utilities';
 import { data } from './data.js';
 
 function PoseNet() {
+
+  // 텐서플로우에서 사용중인 백엔드를 알 수 있는 코드
+  // setTimeout( ()=> {
+  //   console.log(tf.getBackend());
+  // }, 1000)
   // useRef로 웹캠, 캔버스, 게임 참조 변수 생성
   const webcamRef = useRef(null);
   const motionRef = useRef(null);
